@@ -944,7 +944,6 @@ fn randomize_board<R: Rng>(
 mod tests {
     use super::*;
     use crate::hand_range::{get_card_mask, HandRange};
-    use test::Bencher;
 
     #[test]
     fn test_approx_weighted() {
@@ -975,44 +974,5 @@ mod tests {
         let equity = exact_equity(&ranges, board_mask, THREADS).unwrap();
         println!("{:?}", equity);
         assert_eq!(equity[0], 0.8520371330210104);
-    }
-
-    #[bench]
-    fn bench_random_random(b: &mut Bencher) {
-        // best score with these params
-        // 1,892,190 ns/iter (+/- 176,130)
-        const ERROR: f64 = 0.05;
-        const THREADS: u8 = 4;
-        let ranges = HandRange::from_strings(["random".to_string(), "random".to_string()].to_vec());
-        let board_mask = get_card_mask("");
-        b.iter(|| {
-            let equity = approx_equity(&ranges, board_mask, THREADS, 0.001).unwrap();
-            assert!(equity[0] > 0.5 - ERROR);
-            assert!(equity[0] < 0.5 + ERROR);
-        });
-    }
-
-    #[bench]
-    fn bench_approx_river(b: &mut Bencher) {
-        // best score with these params
-        // 409,370 ns/iter (+/- 335,357)
-        const THREADS: u8 = 4;
-        let ranges = HandRange::from_strings(["ah2c".to_string(), "88+".to_string()].to_vec());
-        let board_mask = get_card_mask("");
-        b.iter(|| {
-            approx_equity(&ranges, board_mask, THREADS, 0.001).unwrap();
-        });
-    }
-
-    #[bench]
-    fn bench_exact_river(b: &mut Bencher) {
-        // best score with these params
-        // 107,971 ns/iter (+/- 7,578)
-        const THREADS: u8 = 4;
-        let ranges = HandRange::from_strings(["ah2c".to_string(), "88+".to_string()].to_vec());
-        let board_mask = get_card_mask("5hJsTc9d4s");
-        b.iter(|| {
-            exact_equity(&ranges, board_mask, THREADS).unwrap();
-        });
     }
 }
